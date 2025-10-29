@@ -24,7 +24,7 @@ def es_blanca(p): return p != "." and p.isupper()
 def es_negra(p): return p != "." and p.islower()
 
 def convertir_coordenada_txt_a_tuple(coordenada):
-    columnas = {"a":0,"b":1,"c":2,"d":3,"e":4,"f":4,"g":6,"h":7}
+    columnas = {"a":0,"b":1,"c":2,"d":3,"e":4,"f":5,"g":6,"h":7}
     col = columnas[coordenada[0].lower()]
     row = 8 - int(coordenada[1])
     return (row, col)
@@ -141,8 +141,23 @@ def agente_reactivo(tablero, turno):
     posibles = generar_siguientes_estados(tablero, turno)
     if not posibles:
         return tablero, None, None
-    origen, destino, nuevo_tablero = random.choice(posibles)
-    print(f"Agente ({turno}) juega: {origen} -> {destino}")
+
+    capturas = []
+    for origen_txt, destino_txt, nuevo_tablero in posibles:
+        rr, cc = convertir_coordenada_txt_a_tuple(destino_txt)
+        pieza_dest = tablero[rr][cc]
+        if pieza_dest != ".":
+            if turno == "negras" and es_blanca(pieza_dest):
+                capturas.append((origen_txt, destino_txt, nuevo_tablero))
+            if turno == "blancas" and es_negra(pieza_dest):
+                capturas.append((origen_txt, destino_txt, nuevo_tablero))
+
+    if capturas:
+        origen, destino, nuevo_tablero = random.choice(capturas)
+        print(f"Agente ({turno}) COME: {origen} -> {destino}")
+    else:
+        origen, destino, nuevo_tablero = random.choice(posibles)
+        print(f"Agente ({turno}) juega: {origen} -> {destino}")
     return nuevo_tablero, origen, destino
 
 def jugar():
